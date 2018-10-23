@@ -1,0 +1,38 @@
+#!/Users/alex/.rvm/rubies/ruby-2.5.1/bin/ruby
+
+input_filename = ARGV[0]
+
+if (input_filename == nil)
+  abort("Usage: rgx <target file> <capture pattern> <replace text>")
+end
+
+modified_lines = []
+
+# Copy input file to array
+File.foreach(input_filename, sep: "\n") { |line| modified_lines.push(line) }
+
+# Run input patterns over array
+ARGV.clear
+ARGF.each do |pattern_line|
+  patterns = pattern_line.split(/\ >>>\ /)
+  capture = Regexp.new(patterns[0].strip)
+  replace = patterns[1].strip
+  puts "CAPTURE", capture
+  puts "REPLACE", replace
+  if (capture == nil or replace == nil) then abort("Bad input file") end
+
+  modified_lines.each_with_index do |line, index|
+    changed_line = line.gsub(capture, replace)
+    modified_lines[index] = changed_line
+  end
+end
+
+# Determine output filename (input filename prepended with "_")
+basename = File.basename(input_filename)
+directory = File.dirname(input_filename)
+output_filename = directory + "/_" + basename
+
+# Write to output file
+File.open(output_filename, "w") do |file|
+  modified_lines.each { |line| file.write(line) }
+end

@@ -16,6 +16,9 @@ def get_line_status entry
   elsif (/[\[\]]/ =~ entry) # Check for brackets
     is_valid = false
     reason = 'Invalid characters [ ]'
+  elsif (/^\d+\. / =~ entry) # Check for unnecessary numbering
+    is_valid = false
+    reason = 'Unnecessary numbering (ex. "1. ...", "2. ...")'
     # elsif (/[\(\)]/ =~ entry) # Check for parens
     #  is_valid = false
     #  reason = 'Invalid characters ( )'
@@ -30,8 +33,8 @@ def get_line_status entry
   }
 end
 
-bad_file = File.open("bad.txt", "a")
-good_file = File.open("good.txt", "a")
+bad_file = File.open("bad.txt", "w")
+good_file = File.open("good.txt", "w")
 
 current_video_id = -1
 current_mix_songs = []
@@ -46,13 +49,15 @@ File.foreach(ARGV[0], sep: "\n") do |line|
 
   if current_video_id == -1 then current_video_id = video_id end
   if video_id != current_video_id
-    if (!is_valid_mix)
+    #puts video_id
+    if !is_valid_mix
+      #puts "INVALID MIX"
       current_mix_songs.each do |current_song|
         bad_file.write("#{current_song[:value]}\n")
       end
     elsif
       current_mix_songs.each do |current_song|
-        puts "#{current_song[:value]}\n"
+        # puts "#{current_song[:value]}\n"
         good_file.write("#{current_song[:value]}\n")
       end
     end
@@ -82,7 +87,7 @@ if (!is_valid_mix)
   end
 elsif
   current_mix_songs.each do |current_song|
-    puts "#{current_song[:value]}\n"
+    # puts "#{current_song[:value]}\n"
     good_file.write("#{current_song[:value]}\n")
   end
 end

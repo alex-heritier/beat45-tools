@@ -8,6 +8,7 @@ def remove_extra_info lines
   lines.each do |line|
     if is_in_insert_block
       if (/^$/.match(line) != nil) then return new_lines end
+      if (/^.*INSERT.*$/.match(line) != nil) then next end
       new_lines.push(line)
     elsif
       if (/^.*INSERT.*$/.match(line) != nil) then is_in_insert_block = true end # Check for INSERT line
@@ -24,8 +25,9 @@ def format_data lines
   lines.each do |line|
     line.gsub!(/\('?/, "")
     line.gsub!(/'?\),?;?/, "")
+    line.gsub!("\\r", "")
 
-    components = line.split(/'?, '?/)
+    components = line.split(/, '/)
     video_id = components[0]
     raw_songs = components[1]
 
