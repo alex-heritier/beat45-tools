@@ -5,6 +5,11 @@ def create_update_sql(video_id, video_mixes)
 
   video_mixes.each do |mix|
     mix.gsub!(/\t\t###.*$/, "")
+    mix.gsub!(/(?!=\ )-/, " -")
+    mix.gsub!(/-(?!>\ )/, "- ")
+    mix.gsub!(/\t/, " ")
+    mix.gsub!(/\ \ +/, " ")
+    mix.gsub!("â€“", "-")
     flat_songlist += "#{mix}\n"
   end
 

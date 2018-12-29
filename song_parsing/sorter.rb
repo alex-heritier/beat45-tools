@@ -4,27 +4,30 @@ def get_line_status entry
   is_valid = true
   reason = ''
 
-  if (entry.scan(/ -[\n\ ]/).size == 0) # Check for missing hyphen
-    is_valid = false
-    reason = 'Missing separator hyphen'
-  elsif (entry.scan(/ - /).size > 1) # Check for multiple hyphens surrounded by whitespace
-    is_valid = false
-    reason = 'Multiple hyphens used for formatting'
-  elsif (/-(?!.)/ =~ entry) # Check for missing right value
-    is_valid = false
-    reason = 'Missing right value'
-  elsif (/[\[\]]/ =~ entry) # Check for brackets
+  if (/[\[\]]/ =~ entry) # Check for brackets
     is_valid = false
     reason = 'Invalid characters [ ]'
   elsif (/^\d+\. / =~ entry) # Check for unnecessary numbering
     is_valid = false
     reason = 'Unnecessary numbering (ex. "1. ...", "2. ...")'
-    # elsif (/[\(\)]/ =~ entry) # Check for parens
-    #  is_valid = false
-    #  reason = 'Invalid characters ( )'
+  elsif (entry.scan(/ -[\n\ ]/).size == 0) # Check for missing separator hyphen
+    is_valid = false
+    if (entry.scan(/ -\t/).size > 0) # Check for tab after hyphen
+      reason = 'Separator hyphen has a TAB after it'
+    elsif (entry.scan(/\t- /).size > 0) # Check for tab before hyphen
+      reason = 'Separator hyphen has a TAB before it'
+    else
+      reason = 'Missing separator hyphen'
+    end
   elsif (/[\t]/ =~ entry) # Check for tabs
     is_valid = false
     reason = 'Invalid character TAB'
+  elsif (entry.scan(/ - /).size > 1) # Check for multiple hyphens surrounded by whitespace
+    is_valid = false
+    reason = 'Multiple separator hyphens found'
+  elsif (/-(?!.)/ =~ entry) # Check for missing right value
+    is_valid = false
+    reason = 'Missing right value'
   end
 
   return {
