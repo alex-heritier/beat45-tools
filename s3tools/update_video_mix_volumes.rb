@@ -11,19 +11,29 @@ File.foreach(filename) do |line|
   video_id = tokens[0].strip
   video_url = tokens[1].strip
 
-  videos.push({ id: video_url, url: video_url })
+  videos.push({ id: video_id, url: video_url })
 end
 
 # Loop over video mix .mp4's
 tmp_filename = '/tmp/_mix.mp4'
+sql_filename = '/tmp/_update_mix_volumes.sql'
+
+## Clear old .sql file
+sql_file = File.open(sql_filename, 'w+')
+sql_file.truncate(0)
 
 videos.each do |video|
   # Download file locally
   puts "Downloading #{video[:url]}..."
-  result = `curl #{video[:url]} > #{tmp_filename}`
+  puts `curl "#{video[:url]}" > #{tmp_filename}`
 
   # Calculate volume data
   result = `./calculate_volume.rb #{tmp_filename}`
+  avg_volume = result[/^.*?: (-?\d+\.\d+)/, 1]
 
   # Create UPDATE command
+  unless avg_volume == nil or avg_volume.empty?
+    sql_file.write("UPDATE video_mix SET avg_volume='#{avg_volume}' WHERE video_id='#{video[:id]}';\n")
+    sql_file.flush
+  end
 end
