@@ -1,4 +1,4 @@
-#!/Users/alex/.rvm/rubies/ruby-2.5.3/bin/ruby
+#!/usr/bin/ruby
 
 filename = ARGV[0]
 csv_filename = "/tmp/#{File.basename(filename, ".*")}.csv"
@@ -20,7 +20,7 @@ File.foreach(csv_filename) do |line|
   volume_avg += rms
   frames += 1
 end
-volume_avg /= frames
+volume_avg /= frames unless frames == 0
 
 puts "Done!\n\n"
 puts "Average RMS level in dBFS: #{volume_avg}"
