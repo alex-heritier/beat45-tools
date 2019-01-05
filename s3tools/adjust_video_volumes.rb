@@ -8,7 +8,7 @@ def perform_query(query)
 end
 
 def change_video_volume(in_file, out_file, amount)
-	cmd = "ffmpeg -y -i #{in_file} -vcodec copy -b:a 314k -af \"volume=#{amount}dB\" \"#{out_file}\""
+	cmd = "ffmpeg -y -i \"#{in_file}\" -vcodec copy -b:a 314k -af \"volume=#{amount}dB\" \"#{out_file}\""
 	`#{cmd}`
 end
 
@@ -17,13 +17,15 @@ mix_infos = []
 
 #=begin
 File.foreach(filename) do |line|
-  tokens = line.split(",")
+  tokens = line.split(/\ *,\ */)
   video_id = tokens[0]
 
   puts "Getting video URL for #{video_id}..."
   query = "SELECT mix_path FROM video_mix WHERE video_id=#{video_id}"
-  result = perform_query query
-  return if result.empty?
+  result = perform_query(query)
+  abort "ERROR: Failed to load URL" if result.empty?
+
+  puts "VOLUME #{tokens[1]}"
 
   mix_infos.push({
     video_id: video_id,
@@ -51,35 +53,36 @@ mix_infos.each do |mix_info|
   # 	s3 download mix
   bucket_path = mix_info[:url][/^http.*?\.com\/(.*)$/, 1]
   puts "Downloading s3://#{bucket_path}..."
-  cmd = "aws s3 cp s3://#{bucket_path} #{tmp_filename}"
+  cmd = "aws s3 cp \"s3://#{bucket_path}\" \"#{tmp_filename2}\""
   result = `#{cmd}`
   puts "Done!"
 
   #	update volume mix
-  out_filename = "/tmp/#{File.basename(bucket_path, ".mp4")}_x.mp4"
-  puts "Updating volume and saving to #{out_filename}..."
+  puts "Updating volume and saving to #{tmp_filename}..."
   change_video_volume(
-    tmp_filename,
-    out_filename, 
+    tmp_filename2,
+    tmp_filename, 
     mix_info[:volume_offset]
   )
   puts "Done!"
 
   #	s3 upload mix with new name
+  out_filename = "#{File.basename(bucket_path, ".mp4")}_x.mp4"
+
   puts "Uploading volume adjusted mix to S3..."
-  cmd = "aws s3 cp #{out_filename} s3://beat45-test-bucket/mixes/#{out_filename} --acl public-read"
+  cmd = "aws s3 cp \"#{tmp_filename}\" \"s3://beat45-test-bucket/mixes/#{out_filename}\" --acl public-read"
   result = `#{cmd}`
   puts "Done!"
 
   #	Calculate new average volume
   puts "Calculating new average volume..."
-  cmd = "./calculate_volume.rb #{out_filename}"
+  cmd = "./calculate_volume.rb \"#{tmp_filename}\""
   result = `#{cmd}`
   new_volume = result[/^.*?: (-?\d+\.\d+)/, 1]
   puts "Done!"
 
   #	DB update mix_path & avg_volume
   puts "Updating DB values..."
-  perform_query "UPDATE video_mix SET avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename}' WHERE video_id=#{mix_info[:video_id]}"
+  perform_query "UPDATE video_mix SET status='P', avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename}' WHERE video_id=#{mix_info[:video_id]}"
   puts "Done!"
 end
