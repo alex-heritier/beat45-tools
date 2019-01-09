@@ -77,7 +77,7 @@ File.foreach(ARGV[0], sep: "\n") do |line|
   if song_status[:is_valid]
     formatted_song = "#{formatted_song}"
   else
-    formatted_song = "#{formatted_song}\t\t### #{song_status[:reason]}"
+    formatted_song = "#{formatted_song.strip}\t\t### #{song_status[:reason]}"
   end
 
   song_status[:value] = formatted_song
