@@ -10,6 +10,7 @@ def create_update_sql(video_id, video_mixes)
     mix.gsub!(/\t/, " ")
     mix.gsub!(/\ \ +/, " ")
     mix.gsub!("â€“", "-")
+    mix.gsub!(/^([A-Z\ ]+)$/, "_COMMENT_ - \\1")
     flat_songlist += "#{mix}\n"
   end
 
