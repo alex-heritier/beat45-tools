@@ -69,7 +69,10 @@ mix_infos.each do |mix_info|
   puts "Done!"
 
 #	DB update mix_path & avg_volume & status
-	puts "Updating DB values..."
-	perform_query "UPDATE video_mix SET status='P', avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename.gsub("'", "\'")}' WHERE video_id=#{mix_info[:video_id]}"
-	puts "Done!"
+  puts "Updating DB values..."
+  File.write("/tmp/_adjust_query.sql", "UPDATE video_mix SET status='P', avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename.gsub("'", "''")}' WHERE video_id=#{mix_info[:video_id]}")
+
+  cmd = "mysql -u root -h beat45.com -p'Zse45tgb' -P 3306 -D beat45db < /tmp/_adjust_query.sql"
+  result = `#{cmd}`
+  puts "Done!"
 end
