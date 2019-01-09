@@ -8,7 +8,7 @@ def perform_query(query)
 end
 
 def change_video_volume(in_file, out_file, amount)
-	cmd = "ffmpeg -y -i #{in_file} -vcodec copy -b:a 314k -af \"volume=#{amount}dB\" \"#{out_file}\""
+	cmd = "ffmpeg -y -i #{in_file} -vcodec copy -b:a 314k -af \"volume=#{amount}dB\" \"#{out_file}\" | grep \"speed=\""
 	`#{cmd}`
 end
 
@@ -42,8 +42,8 @@ mix_infos = [
 ]
 =end
 
-tmp_filename = "/tmp/_mix.mp4"
-tmp_filename2 = "/tmp/__mix.mp4"
+tmp_filename = "/tmp/_mix_adjust.mp4"
+tmp_filename2 = "/tmp/__mix_adjust.mp4"
 
 # Loop over mix URLs
 mix_infos.each do |mix_info|
@@ -78,6 +78,6 @@ mix_infos.each do |mix_info|
 
 #	DB update mix_path & avg_volume & status
 	puts "Updating DB values..."
-	perform_query "UPDATE video_mix SET status='P', avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename}' WHERE video_id=#{mix_info[:video_id]}"
+	perform_query "UPDATE video_mix SET status='P', avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename.gsub("'", "\'")}' WHERE video_id=#{mix_info[:video_id]}"
 	puts "Done!"
 end
