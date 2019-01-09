@@ -1,18 +1,19 @@
 #!/usr/bin/ruby
 
-API_TOKEN = "xoxp-359675659414-358555366084-520897707702-fcb05a318562e54a5d959ae26efe7d4d"
-CHANNEL = "data-quality-reports"
-AUTHOR = "#{`whoami`.strip}@#{`hostname`.strip}"
+API_TOKEN = "xoxp-359675659414-358555366084-520597033399-5cb5c33453b458c92f4d0f150335e756"
+AUTHOR = "#{`whoami`.strip}@#{`hostname`.strip}" || "Automated script"
+TEXT = ARGV[0]
+CHANNEL = ARGV[1] || "data-quality-reports"
 
-chat_text = ARGV[0]
-if (chat_text == nil) then abort("No input") end
+if (TEXT == nil) then abort("No input") end
 
 cmd = p %{
 curl -X POST \
      -H 'Authorization: Bearer #{API_TOKEN}' \
      -H 'Content-type: application/json; charset=utf-8' \
-    --data '{"text": "#{chat_text}", "channel": "##{CHANNEL}","username":"#{AUTHOR}"}' \
+    --data '{"text": "#{TEXT}", "channel": "##{CHANNEL}","username":"#{AUTHOR}"}' \
 https://slack.com/api/chat.postMessage
 }
 
-`#{cmd}`
+response = `#{cmd}`
+puts response
