@@ -24,8 +24,8 @@ sql_file.truncate(0)
 
 videos.each do |video|
   # Download file locally
-  puts "Downloading #{video[:url]}..."
-  puts `curl "#{video[:url]}" > #{tmp_filename}`
+  base_url = File.basename video[:url]
+  puts `aws s3 cp "s3://beat45-test-bucket/mixes/#{base_url}" #{tmp_filename}`
 
   # Calculate volume data
   result = `./calculate_volume.rb #{tmp_filename}`

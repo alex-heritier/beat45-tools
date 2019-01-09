@@ -25,8 +25,6 @@ File.foreach(filename) do |line|
   result = perform_query(query)
   abort "ERROR: Failed to load URL" if result.empty?
 
-  puts "VOLUME #{tokens[1]}"
-
   mix_infos.push({
     video_id: video_id,
     volume_offset: tokens[1],
