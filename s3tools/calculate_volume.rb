@@ -1,4 +1,4 @@
-#!/Users/alex/.rvm/rubies/ruby-2.5.3/bin/ruby
+#!/usr/bin/ruby
 
 filename = ARGV[0]
 simple_output = ARGV[1] != nil

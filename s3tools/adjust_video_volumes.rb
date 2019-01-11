@@ -25,28 +25,15 @@ File.foreach(filename) do |line|
   result = perform_query(query)
   abort "ERROR: Failed to load URL" if result.empty?
 
-  puts "VOLUME #{tokens[1]}"
-
   mix_infos.push({
     video_id: video_id,
     volume_offset: tokens[1],
     url: result
   })
 end
-#=end
 
-=begin
-mix_infos = [
-  {
-    video_id: 1,
-    volume_offset: 11.87,
-    url: "https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/210_BB45M7-658e3032c5c0a1a48d598eae41617edf.mp4"
-  }
-]
-=end
-
-tmp_filename = "/tmp/_mix.mp4"
-tmp_filename2 = "/tmp/__mix.mp4"
+tmp_filename = "/tmp/_mix_adjust.mp4"
+tmp_filename2 = "/tmp/__mix_adjust.mp4"
 
 # Loop over mix URLs
 mix_infos.each do |mix_info|
@@ -81,8 +68,11 @@ mix_infos.each do |mix_info|
   new_volume = result[/^.*?: (-?\d+\.\d+)/, 1]
   puts "Done!"
 
-  #	DB update mix_path & avg_volume
+#	DB update mix_path & avg_volume & status
   puts "Updating DB values..."
-  perform_query "UPDATE video_mix SET status='P', avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename}' WHERE video_id=#{mix_info[:video_id]}"
+  File.write("/tmp/_adjust_query.sql", "UPDATE video_mix SET status='P', avg_volume='#{new_volume}', mix_path='https://s3-us-west-1.amazonaws.com/beat45-test-bucket/mixes/#{out_filename.gsub("'", "''")}' WHERE video_id=#{mix_info[:video_id]}")
+
+  cmd = "mysql -u root -h beat45.com -p'Zse45tgb' -P 3306 -D beat45db < /tmp/_adjust_query.sql"
+  result = `#{cmd}`
   puts "Done!"
 end
