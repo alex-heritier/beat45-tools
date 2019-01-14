@@ -1,0 +1,3 @@
+change.video.volume:
+  run:
+    "change_video_volume.rb @video_mix_id @amount"

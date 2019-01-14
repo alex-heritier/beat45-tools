@@ -9,6 +9,10 @@ module Beat45
   AWS_REGION = 'us-east-2'
   QUEUE_NAME = 'beat45-queue'
 
+  module Actions
+    CHANGE_VIDEO_VOLUME = 'change.video.volume'
+  end
+
   class SQSClient
     def initialize credentials_filepath
       @client = SQSClient::get_sqs_client(credentials_filepath)
