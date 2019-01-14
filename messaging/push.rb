@@ -1,4 +1,4 @@
-#!/Users/alex/.rvm/rubies/ruby-2.5.3/bin/ruby
+#!/usr/bin/env ruby
 
 require_relative 'b45-messaging'
 
